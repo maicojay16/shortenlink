@@ -15,4 +15,4 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-$router->post('/api/v1/shorten', 'LinkController@test');
+$router->post('/api/v1/shortenlink', 'LinkController@test');
