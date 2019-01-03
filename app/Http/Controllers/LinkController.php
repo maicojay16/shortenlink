@@ -8,9 +8,24 @@ use App\Link;
 class LinkController extends Controller
 {
 
+    /*
+    * @param int $number
+    * @return mixed
+    */
+    private function Jay(int $number): int
+    {
+        return $number;
+    }
+
+
+    /*
+    * @param Request $request
+    * @return response()->json
+    */
     public function test(Request $request)
     {        
-        
+        // return $this->Jay(100);
+
         $link = new Link;
         $token = str_random(12);
         $link->link = $request->input('link');
@@ -40,5 +55,4 @@ class LinkController extends Controller
         );
     }
 
-    //
 }
