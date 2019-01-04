@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Validator;
 use Illuminate\Http\Request;
 use App\Link;
 
@@ -33,28 +34,44 @@ class LinkController extends Controller
         $link->link = $request->input('link');
         $link->token = $token;
 
-        try{
-            $link->save();
-        } catch(\Exception $e){
+        $validator = Validator::make($request->all(), [
+            'link' => 'required|active_url',
+        ]);
+
+        if($validator->fails()){
             return response()->json(
                 [
                     'status' => 'failed',
-                    'message' => 'could not create short link',
+                    'message' => 'please input a valid url',
                     'data' => []
+                ]
+            );
+        }else{
+            try{
+                $link->save();
+            } catch(\Exception $e){
+                return response()->json(
+                    [
+                        'status' => 'failed',
+                        'message' => 'could not create short link',
+                        'data' => []
+                    ]
+                );
+            }
+    
+            return response()->json(
+                [
+                    'status' => 'success',
+                    'message' => 'request is successful',
+                    'data' => [
+                        'link' => $request->input('link'),
+                        'short_link' => $token,
+                    ]
                 ]
             );
         }
 
-        return response()->json(
-            [
-                'status' => 'success',
-                'message' => 'request is successful',
-                'data' => [
-                    'link' => $request->input('link'),
-                    'short_link' => $token,
-                ]
-            ]
-        );
+       
     }
 
 }
