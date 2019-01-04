@@ -19,8 +19,10 @@ class LinkController extends Controller
 
 
     /*
+    * Save Link data to the dababase 
+    *
     * @param Request $request
-    * @return response()->json
+    * @return Response
     */
     public function test(Request $request)
     {        
