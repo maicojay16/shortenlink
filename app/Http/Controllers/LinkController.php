@@ -25,8 +25,7 @@ class LinkController extends Controller
     * @param Request $request
     * @return Response
     */
-    public function test(Request $request)
-    {        
+    public function test(Request $request){        
         // return $this->Jay(100);
 
         $link = new Link;
@@ -70,8 +69,38 @@ class LinkController extends Controller
                 ]
             );
         }
+    }
 
-       
+    /*
+    * Show the link/data from the database
+    *
+    * @param $token
+    * @return Response
+    */
+    public function token($token){
+
+        try{
+            $token_URL = Link::where('token', $token)->firstOrFail();
+            $token_URL->link;
+        } catch(\Exception $e){
+            return response()->json(
+                [
+                    'status' => 'failed',
+                    'message' => 'Could not find your link',
+                    'data' => []
+                ]
+            );
+        }
+
+        return response()->json(
+            [
+                'status' => 'success',
+                'message' => 'request is successful',
+                'data' => [
+                    'link' => $token_URL->link,
+                ]
+            ]
+        );
     }
 
 }
