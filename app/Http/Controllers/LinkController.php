@@ -67,6 +67,25 @@ class LinkController extends Controller
     */
     public function token($token){
 
+        $validator = Validator::make(
+            [
+                'token' => $token
+            ], 
+            [
+                'token' => 'exists:links,token|string',
+            ]
+        );
+
+        if($validator->fails()){
+            return response()->json(
+                [
+                    'status' => 'failed',
+                    'message' => 'please input a valid token',
+                    'data' => []
+                ]
+            );
+        }
+
         try{
             $token_URL = Link::where('token', $token)->firstOrFail();
             $token_URL->link;
