@@ -15,5 +15,5 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-$router->post('/api/v1/shortenlink', 'LinkController@test');
+$router->post('/api/v1/shortenlink', 'LinkController@link');
 $router->get('/get/{token}', 'LinkController@token');
