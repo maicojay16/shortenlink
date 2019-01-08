@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Validator;
 use Illuminate\Http\Request;
 use App\Link;
+use App\LinkAnalytic;
 
 class LinkController extends Controller
 {
@@ -65,7 +66,9 @@ class LinkController extends Controller
     * @param $token
     * @return Response
     */
-    public function token($token){
+    public function token(Request $request, $token){
+
+        //  var_dump($request->server('HTTP_REFERER'));exit;
 
         $validator = Validator::make(
             [
@@ -98,6 +101,19 @@ class LinkController extends Controller
                 ]
             );
         }
+
+        $linkAnalytic = new LinkAnalytic;
+        $linkAnalytic->link_id = $token_URL->id;
+        $linkAnalytic->user_ip = $request->ip();
+        $linkAnalytic->user_agent = $request->header('USER-Agent');
+        $linkAnalytic->referral_link = $request->server('HTTP_REFERER');
+
+        try{
+            $linkAnalytic->save();
+        } catch(\Exception $e){
+            
+        }
+        
 
         return response()->json(
             [
