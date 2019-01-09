@@ -18,6 +18,8 @@ class LinkController extends Controller
     */
     public function link(Request $request)
     {        
+        Log::info('Checking if URL is valid: '.$request->input('link'));
+        
         $validator = Validator::make($request->all(), [
             'link' => 'required|active_url', 
         ]);
@@ -72,6 +74,8 @@ class LinkController extends Controller
     */
     public function token(Request $request, $token)
     {
+        Log::info('Showing data from token: '.$token);
+
         $validator = Validator::make(
             [
                 'token' => $token
