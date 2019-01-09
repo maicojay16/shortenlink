@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Validator;
+use Log;
 use App\Link;
 use App\LinkAnalytic;
 use Illuminate\Http\Request;
@@ -39,6 +40,8 @@ class LinkController extends Controller
         try {
             $link->save();
         } catch (\Exception $e) {
+            $error = $e->getMessage();
+            Log::error($error);
             return response()->json(
                 [
                     'status' => 'failed', 
@@ -63,7 +66,8 @@ class LinkController extends Controller
     /*
     * Show the link/data from the database
     *
-    * @param Request $request, $token
+    * @param Request $request
+    * @param $token
     * @return Response
     */
     public function token(Request $request, $token)
@@ -91,6 +95,8 @@ class LinkController extends Controller
             $token_URL = Link::where('token', $token)->firstOrFail();
             $token_URL->link;
         } catch(\Exception $e) {
+            $error = $e->getMessage();
+            Log::error($error);
             return response()->json(
                 [
                     'status' => 'failed', 
@@ -100,16 +106,17 @@ class LinkController extends Controller
             );
         }
 
-        $link_analytic = new LinkAnalytic;
-        $link_analytic->link_id = $token_URL->id;
-        $link_analytic->user_ip = $request->ip();
-        $link_analytic->user_agent = $request->header('USER-Agent');
-        $link_analytic->referral_link = $request->server('HTTP_REFERER');
+        $linkAnalytic = new LinkAnalytic;
+        $linkAnalytic->link_id = $token_URL->id;
+        $linkAnalytic->user_ip = $request->ip();
+        $linkAnalytic->user_agent = $request->header('USER-Agent');
+        $linkAnalytic->referral_link = $request->server('HTTP_REFERER');
 
         try {
-            $link_analytic->save();
+            $linkAnalytic->save();
         } catch(\Exception $e) {
-            //
+            $error = $e->getMessage();
+            Log::error($error);
         }
         
 
