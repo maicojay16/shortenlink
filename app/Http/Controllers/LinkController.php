@@ -7,6 +7,7 @@ use Log;
 use App\Link;
 use App\LinkAnalytic;
 use Illuminate\Http\Request;
+use App\Helpers\ResponseHelper;
 
 class LinkController extends Controller
 {
@@ -25,13 +26,7 @@ class LinkController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(
-                [
-                    'status' => 'failed', 
-                    'message' => 'please input a valid url', 
-                    'data' => []
-                ]
-            );
+            return ResponseHelper::createJsonResponse('failed', 'please input a valid url', []);
         }
 
         $link = new Link;
@@ -42,27 +37,15 @@ class LinkController extends Controller
         try {
             $link->save();
         } catch (\Exception $e) {
-            $error = $e->getMessage();
-            Log::error($error);
-            return response()->json(
-                [
-                    'status' => 'failed', 
-                    'message' => 'could not create short link', 
-                    'data' => []
-                ]
-            );
+            Log::error($e->getMessage());
+            return ResponseHelper::createJsonResponse('failed', 'could not create short link', []); 
         }
-    
-        return response()->json(
-            [
-                'status' => 'success', 
-                'message' => 'request is successful', 
-                'data' => [
-                    'link' => $request->input('link'), 
-                    'short_link' => $token,
-                ]
-            ]
-        );
+        
+        return ResponseHelper::createJsonResponse('success', 'request is successful', 
+                                                [
+                                                    'link' => $request->input('link'),'short_link' => $token,
+                                                ]);
+
     }
     
     /*
@@ -86,28 +69,15 @@ class LinkController extends Controller
         );
 
         if ($validator->fails()) {
-            return response()->json(
-                [
-                    'status' => 'failed',
-                    'message' => 'please input a valid token', 
-                    'data' => []
-                ]
-            );
+            return ResponseHelper::createJsonResponse('failed', 'please input a valid token', []);
         }
 
         try {
             $token_URL = Link::where('token', $token)->firstOrFail();
             $token_URL->link;
         } catch(\Exception $e) {
-            $error = $e->getMessage();
-            Log::error($error);
-            return response()->json(
-                [
-                    'status' => 'failed', 
-                    'message' => 'Could not find your link', 
-                    'data' => []
-                ]
-            );
+            Log::error($e->getMessage());
+            return ResponseHelper::createJsonResponse('failed', 'Could not find your link', []);
         }
 
         $linkAnalytic = new LinkAnalytic;
@@ -119,19 +89,9 @@ class LinkController extends Controller
         try {
             $linkAnalytic->save();
         } catch(\Exception $e) {
-            $error = $e->getMessage();
-            Log::error($error);
+            Log::error($e->getMessage());
         }
         
-
-        return response()->json(
-            [
-                'status' => 'success', 
-                'message' => 'request is successful', 
-                'data' => [
-                    'link' => $token_URL->link, 
-                ]
-            ]
-        );
+        return ResponseHelper::createJsonResponse('success', 'request is successful', ['link' => $token_URL->link]);
     }
 }
