@@ -26,6 +26,7 @@ class LinkController extends Controller
         ]);
 
         if ($validator->fails()) {
+            Log::alert('Please input a valid url: '.$request->input('link'));
             return ResponseHelper::createJsonResponse('failed', 'please input a valid url', []);
         }
 
@@ -52,7 +53,7 @@ class LinkController extends Controller
     * Show the link/data from the database
     *
     * @param Request $request
-    * @param $token
+    * @param string $token
     * @return Response
     */
     public function token(Request $request, $token)
@@ -69,6 +70,7 @@ class LinkController extends Controller
         );
 
         if ($validator->fails()) {
+            Log::alert('Please input a valid token: '.$token);
             return ResponseHelper::createJsonResponse('failed', 'please input a valid token', []);
         }
 
@@ -77,7 +79,7 @@ class LinkController extends Controller
             $token_URL->link;
         } catch(\Exception $e) {
             Log::error($e->getMessage());
-            return ResponseHelper::createJsonResponse('failed', 'Could not find your link', []);
+            return ResponseHelper::createJsonResponse('failed', 'Could not find your token', []);
         }
 
         $linkAnalytic = new LinkAnalytic;
@@ -93,5 +95,51 @@ class LinkController extends Controller
         }
         
         return ResponseHelper::createJsonResponse('success', 'request is successful', ['link' => $token_URL->link]);
+    }
+
+    /*
+    * Show the number of clicks from token data 
+    *
+    * @param Request $request
+    * @param string $token
+    * @return ResponseHelper
+    */
+    public function analytic(Request $request, $token)
+    {
+        Log::info('Showing data from token: '.$token);
+
+        $validator = Validator::make(
+            [
+                'token' => $token
+            ], 
+            [
+                'token' => 'exists:links,token|string', 
+            ]
+        );
+
+        if ($validator->fails()) {
+            Log::info('Please input a valid token: '.$token);
+            return ResponseHelper::createJsonResponse('failed', 'please input a valid token', []);
+        }
+
+        try {
+            $tokenURL = Link::where('token', $token)->firstOrFail();
+            $numberOfClicks = array();
+            foreach ($tokenURL->linkAnalytic()->get() as $linkAnalytic) {
+                $numberOfClicks[] = $linkAnalytic;
+            }
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return ResponseHelper::createJsonResponse('failed', 'Could not find your token', []);
+        }
+
+        return ResponseHelper::createJsonResponse('success', 'request is successful', 
+                                                [
+                                                    'number of clicks' => count($numberOfClicks),
+
+                                                ]);
+
+        // $l = LinkAnalytic::where('id', 4)->firstOrFail();
+        // echo $l->link()->get()[0]->token;
     }
 }
