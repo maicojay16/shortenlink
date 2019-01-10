@@ -17,3 +17,4 @@ $router->get('/', function () use ($router) {
 
 $router->post('/api/v1/shortenlink', 'LinkController@link');
 $router->get('/get/{token}', 'LinkController@token');
+$router->get('/api/v1/linkdata/{token}', 'LinkController@analytic');
