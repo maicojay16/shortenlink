@@ -74,7 +74,6 @@ class LinkController extends Controller
 
         try {
             $token_URL = Link::where('token', $token)->firstOrFail();
-            $token_URL->link;
         } catch(\Exception $e) {
             Log::error($e->getMessage());
             return ResponseHelper::createJsonResponse('failed', 'Could not find your token', []);
@@ -86,7 +85,7 @@ class LinkController extends Controller
         $linkAnalytic->user_agent = $request->header('USER-Agent');
         $linkAnalytic->referral_link = $request->server('HTTP_REFERER');
 
-        try {
+        try {   
             $linkAnalytic->save();
         } catch(\Exception $e) {
             Log::error($e->getMessage());
@@ -104,8 +103,6 @@ class LinkController extends Controller
     */
     public function analytic(Request $request, $token)
     {
-        Log::info('Showing data from token: '.$token);
-
         $validator = Validator::make(
             [
                 'token' => $token
@@ -118,9 +115,16 @@ class LinkController extends Controller
         if ($validator->fails()) {
             return ResponseHelper::createJsonResponse('failed', 'please input a valid token', []);
         }
-
+        
         try {
             $tokenURL = Link::where('token', $token)->firstOrFail();
+            $linkAnalytics = $tokenURL->linkAnalytic();
+            $count = $linkAnalytics->count();
+            $linkData = [];
+            foreach ($linkAnalytics->get() as $LA) {
+                $linkData[$LA->id][$LA->user_ip] = $LA->user_agent;
+            }           
+            
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             return ResponseHelper::createJsonResponse('failed', 'Could not find your token', []);
@@ -128,7 +132,8 @@ class LinkController extends Controller
 
         return ResponseHelper::createJsonResponse('success', 'request is successful', 
                                                 [
-                                                    'number of clicks' => $tokenURL->linkAnalytic()->count(),
+                                                    'number_of_clicks' => $count,
+                                                    'user_data' => $linkData,
                                                 ]);
        
     }
