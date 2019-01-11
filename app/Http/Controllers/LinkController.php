@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use Validator;
 use Log;
-use App\Link;
-use App\LinkAnalytic;
+use App\Model\Link;
+use App\Model\LinkAnalytic;
 use Illuminate\Http\Request;
 use App\Helpers\ResponseHelper;
 
