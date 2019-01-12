@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Validator;
 use Log;
+use Cache;
 use App\Model\Link;
 use App\Model\LinkAnalytic;
 use Illuminate\Http\Request;
@@ -73,7 +74,13 @@ class LinkController extends Controller
         }
 
         try {
-            $token_URL = Link::where('token', $token)->firstOrFail();
+            if (Cache::has($token)) {
+                $token_URL = Cache::get($token);
+            } else {
+                $token_URL = Cache::remember($token, 22*60, function() use ($token){
+                    return Link::where('token', $token)->firstOrFail();
+                });
+            }
         } catch(\Exception $e) {
             Log::error($e->getMessage());
             return ResponseHelper::createJsonResponse('failed', 'Could not find your token', []);
